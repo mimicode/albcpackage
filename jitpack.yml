@@ -1,0 +1,7 @@
+jdk:
+  - openjdk11
+before_install:
+  - ./gradlew clean
+install:
+  - ./gradlew maven-publish:publishToMavenLocal
+  - find ~/.m2/repository -name "*.jar" -o -name "*.aar" | xargs ls -la 

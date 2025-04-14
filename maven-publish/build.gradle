@@ -1,0 +1,77 @@
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
+
+android {
+    compileSdkVersion 33
+    
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+        
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    
+    lintOptions {
+        abortOnError false
+    }
+
+    // 添加libs目录下的所有jar和aar文件作为编译库
+    dependencies {
+        implementation fileTree(dir: '../libs', include: ['*.jar', '*.aar'])
+    }
+}
+
+// 将libs目录复制到maven-publish模块中
+task copyLibs(type: Copy) {
+    from '../libs'
+    into 'libs'
+}
+
+preBuild.dependsOn(copyLibs)
+
+// 将所有的aar和jar文件作为独立的artifacts发布
+afterEvaluate {
+    publishing {
+        publications {
+            // 为每个AAR和JAR创建单独的发布
+            def libsDir = new File(projectDir.parent, 'libs')
+            libsDir.listFiles().each { file ->
+                if (file.name.endsWith('.aar') || file.name.endsWith('.jar')) {
+                    def artifactName = file.name.lastIndexOf('.').with { it != -1 ? file.name[0..<it] : file.name }
+                    
+                    "${artifactName}"(MavenPublication) {
+                        groupId = 'com.github.mimicode.albcpackage' // GitHub用户名和仓库名
+                        artifactId = artifactName
+                        version = '1.0.0'
+                        
+                        artifact(file)
+                    }
+                }
+            }
+            
+            // 创建一个包含所有库的AAR发布
+            release(MavenPublication) {
+                from components.release
+                
+                groupId = 'com.github.mimicode.albcpackage' // GitHub用户名和仓库名
+                artifactId = 'all-libs'
+                version = '1.0.0'
+            }
+        }
+    }
+} 

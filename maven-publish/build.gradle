@@ -36,10 +36,19 @@ android {
     }
 }
 
+// 确保libs目录存在
+def libsDir = new File(projectDir.parent, 'libs')
+def localLibsDir = new File(projectDir, 'libs')
+
 // 将libs目录复制到maven-publish模块中
 task copyLibs(type: Copy) {
     from '../libs'
     into 'libs'
+    doFirst {
+        if (!localLibsDir.exists()) {
+            localLibsDir.mkdirs()
+        }
+    }
 }
 
 preBuild.dependsOn(copyLibs)
@@ -49,17 +58,18 @@ afterEvaluate {
     publishing {
         publications {
             // 为每个AAR和JAR创建单独的发布
-            def libsDir = new File(projectDir.parent, 'libs')
-            libsDir.listFiles().each { file ->
-                if (file.name.endsWith('.aar') || file.name.endsWith('.jar')) {
-                    def artifactName = file.name.lastIndexOf('.').with { it != -1 ? file.name[0..<it] : file.name }
-                    
-                    "${artifactName}"(MavenPublication) {
-                        groupId = 'com.github.mimicode.albcpackage' // GitHub用户名和仓库名
-                        artifactId = artifactName
-                        version = '1.0.0'
+            if (libsDir.exists() && libsDir.isDirectory()) {
+                libsDir.listFiles().each { file ->
+                    if (file.name.endsWith('.aar') || file.name.endsWith('.jar')) {
+                        def artifactName = file.name.lastIndexOf('.').with { it != -1 ? file.name[0..<it] : file.name }
                         
-                        artifact(file)
+                        "${artifactName}"(MavenPublication) {
+                            groupId = 'com.github.mimicode.albcpackage' // GitHub用户名和仓库名
+                            artifactId = artifactName
+                            version = '1.0.0'
+                            
+                            artifact(file)
+                        }
                     }
                 }
             }

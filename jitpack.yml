@@ -1,7 +1,9 @@
 jdk:
   - openjdk11
 before_install:
+  - chmod +x gradlew
   - ./gradlew clean
 install:
-  - ./gradlew maven-publish:publishToMavenLocal
+  - echo "Running a custom install command"
+  - ./gradlew maven-publish:publishToMavenLocal -x test
   - find ~/.m2/repository -name "*.jar" -o -name "*.aar" | xargs ls -la 

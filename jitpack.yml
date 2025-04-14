@@ -13,8 +13,8 @@ env:
 
 jitpack:
   before:
-    - mkdir -p ~/.m2/repository/com/github/mimicode/albcpackage/1.0.0
+    - mkdir -p ~/.m2/repository/com/github/mimicode/albcpackage/1.0.2
     - ls -la libs/
-    - find libs/ -name "*.jar" -o -name "*.aar" | while read file; do BASENAME=$(basename "$file"); ARTIFACT_NAME="${BASENAME%.*}"; mkdir -p ~/.m2/repository/com/github/mimicode/albcpackage/$ARTIFACT_NAME/1.0.0; cp "$file" ~/.m2/repository/com/github/mimicode/albcpackage/$ARTIFACT_NAME/1.0.0/"$ARTIFACT_NAME-1.0.0.${file##*.}"; echo "Copied $file to ~/.m2/repository/com/github/mimicode/albcpackage/$ARTIFACT_NAME/1.0.0/$ARTIFACT_NAME-1.0.0.${file##*.}"; done
+    - find libs/ -name "*.jar" -o -name "*.aar" | while read file; do BASENAME=$(basename "$file"); ARTIFACT_NAME="${BASENAME%.*}"; mkdir -p ~/.m2/repository/com/github/mimicode/albcpackage/$ARTIFACT_NAME/1.0.2; cp "$file" ~/.m2/repository/com/github/mimicode/albcpackage/$ARTIFACT_NAME/1.0.2/"$ARTIFACT_NAME-1.0.2.${file##*.}"; echo "Copied $file to ~/.m2/repository/com/github/mimicode/albcpackage/$ARTIFACT_NAME/1.0.2/$ARTIFACT_NAME-1.0.2.${file##*.}"; done
     - echo "直接构建artifacts完成"
     - find ~/.m2/repository/com/github/mimicode/albcpackage -type f | sort 

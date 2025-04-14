@@ -29,58 +29,36 @@ android {
     lintOptions {
         abortOnError false
     }
-
-    // 添加libs目录下的所有jar和aar文件作为编译库
-    dependencies {
-        implementation fileTree(dir: '../libs', include: ['*.jar', '*.aar'])
-    }
 }
-
-// 确保libs目录存在
-def libsDir = new File(projectDir.parent, 'libs')
-def localLibsDir = new File(projectDir, 'libs')
 
 // 将libs目录复制到maven-publish模块中
 task copyLibs(type: Copy) {
     from '../libs'
-    into 'libs'
-    doFirst {
-        if (!localLibsDir.exists()) {
-            localLibsDir.mkdirs()
-        }
-    }
+    into "${buildDir}/outputs/aar/"
 }
 
 preBuild.dependsOn(copyLibs)
 
-// 将所有的aar和jar文件作为独立的artifacts发布
+// 创建一个空的AAR文件
+task createDummyAar {
+    doLast {
+        new File("${buildDir}/outputs/aar/maven-publish-release.aar").withWriter { writer ->
+            writer.write("This is a placeholder AAR file.")
+        }
+    }
+}
+
 afterEvaluate {
+    assembleRelease.finalizedBy(createDummyAar)
+    
     publishing {
         publications {
-            // 为每个AAR和JAR创建单独的发布
-            if (libsDir.exists() && libsDir.isDirectory()) {
-                libsDir.listFiles().each { file ->
-                    if (file.name.endsWith('.aar') || file.name.endsWith('.jar')) {
-                        def artifactName = file.name.lastIndexOf('.').with { it != -1 ? file.name[0..<it] : file.name }
-                        
-                        "${artifactName}"(MavenPublication) {
-                            groupId = 'com.github.mimicode.albcpackage' // GitHub用户名和仓库名
-                            artifactId = artifactName
-                            version = '1.0.0'
-                            
-                            artifact(file)
-                        }
-                    }
-                }
-            }
-            
-            // 创建一个包含所有库的AAR发布
             release(MavenPublication) {
-                from components.release
-                
-                groupId = 'com.github.mimicode.albcpackage' // GitHub用户名和仓库名
+                groupId = 'com.github.mimicode.albcpackage'
                 artifactId = 'all-libs'
                 version = '1.0.0'
+                
+                artifact("${buildDir}/outputs/aar/maven-publish-release.aar")
             }
         }
     }

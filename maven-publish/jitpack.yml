@@ -1,2 +1,4 @@
 publish:
-  artifact: build/outputs/aar/maven-publish-release.aar 
+  artifact: maven-publish-release.aar
+  groupId: com.github.mimicode.albcpackage
+  artifactId: all-libs 

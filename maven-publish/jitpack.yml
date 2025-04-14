@@ -1,0 +1,2 @@
+publish:
+  artifact: build/outputs/aar/maven-publish-release.aar 
